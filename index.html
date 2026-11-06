@@ -68,18 +68,23 @@
     <div class="ui-layer w-full h-full flex flex-col justify-between p-4 md:p-8 pointer-events-none">
 
         <!-- Top Header -->
-        <header class="w-full flex justify-between items-center max-w-7xl mx-auto">
-            <div class="flex items-center space-x-3 glass-panel px-4 py-2 rounded-full interactive">
-                <i class="fa-solid fa-heart text-pink-400 text-lg animate-pulse"></i>
-                <span class="title-font text-sm md:text-base font-bold tracking-wider bg-gradient-to-r from-pink-200 via-rose-300 to-pink-500 bg-clip-text text-transparent">Galaxia 3D de Tulipanes</span>
+        <header class="w-full flex justify-between items-center max-w-7xl mx-auto relative">
+            <!-- Título centrado en móvil, alineado a la izquierda en PC -->
+            <div class="w-full md:w-auto flex justify-center md:justify-start">
+                <div class="flex items-center space-x-3 glass-panel px-4 py-2 rounded-full interactive">
+                    <i class="fa-solid fa-heart text-pink-400 text-lg animate-pulse"></i>
+                    <span class="title-font text-xs md:text-base font-bold tracking-wider bg-gradient-to-r from-pink-200 via-rose-300 to-pink-500 bg-clip-text text-transparent">Galaxia 3D de Tulipanes</span>
+                </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button id="view-mode-btn" class="glass-panel interactive px-4 py-2 rounded-full text-xs font-semibold text-pink-200 hover:text-white hover:border-pink-400 transition-all flex items-center space-x-2">
-                    <i class="fa-solid fa-cube"></i>
+
+            <!-- Botones flotantes pequeños a la izquierda en móvil, normales en PC -->
+            <div class="absolute top-16 left-4 md:relative md:top-auto md:left-auto flex flex-col md:flex-row items-start md:items-center gap-2">
+                <button id="view-mode-btn" class="glass-panel interactive px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[11px] md:text-xs font-semibold text-pink-200 hover:text-white hover:border-pink-400 transition-all flex items-center space-x-1.5 shadow-lg">
+                    <i class="fa-solid fa-cube text-xs"></i>
                     <span id="view-mode-text">Vista Órbita</span>
                 </button>
-                <button id="audio-toggle" class="glass-panel interactive px-4 py-2 rounded-full text-xs font-semibold text-pink-200 hover:text-white hover:border-pink-400 transition-all flex items-center space-x-2">
-                    <i class="fa-solid fa-music"></i>
+                <button id="audio-toggle" class="glass-panel interactive px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[11px] md:text-xs font-semibold text-pink-200 hover:text-white hover:border-pink-400 transition-all flex items-center space-x-1.5 shadow-lg">
+                    <i class="fa-solid fa-music text-xs"></i>
                     <span id="audio-text">Melodía</span>
                 </button>
             </div>
@@ -743,7 +748,6 @@
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(tulipClusters, true);
 
-            // SOLO se activa si se hace clic DIRECTAMENTE sobre un tulipán (se eliminó el activador en el fondo vacío)
             if (intersects.length > 0) {
                 let obj = intersects[0].object;
                 while (obj && !obj.userData?.verse && obj.parent) {
