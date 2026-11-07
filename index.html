@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaxia 3D de Tulipanes Rosas</title>
+    <title>Galaxia 3D de Tulipanes Multicolor</title>
+    <!-- Favicon de Tulipán en SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 2C12 8 8 11 8 16c0 4.4 3.6 8 8 8s8-3.6 8-8c0-5-4-8-8-14z' fill='%23f43f5e'/><path d='M16 22v8M12 26h8' stroke='%234ade80' stroke-width='2' stroke-linecap='round'/></svg>">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js Library -->
@@ -89,9 +91,9 @@
             </div>
         </header>
 
-        <!-- Center Floating Card / Intro Banner -->
+        <!-- Center Floating Card / Intro Banner (Oculto al inicio para la animación de Zoom) -->
         <div class="flex justify-center items-center my-auto">
-            <div id="love-card" class="glass-panel rounded-3xl p-6 md:p-8 max-w-md w-full text-center interactive transition-all duration-1000 shadow-2xl opacity-100 transform scale-100">
+            <div id="love-card" class="glass-panel rounded-3xl p-6 md:p-8 max-w-md w-full text-center interactive transition-all duration-1000 shadow-2xl opacity-0 transform scale-90 pointer-events-none">
                 <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/40 text-white">
                     <i class="fa-solid fa-seedling text-2xl animate-bounce"></i>
                 </div>
@@ -143,9 +145,11 @@
         let galaxyParticles, backgroundStars, distantGalaxies, nebulaClouds, coreParticleCloud, tulipClusters = [], burstParticles = [], shootingStars = [];
         let isAutoRotating = true;
         
-        // Camera Orbit & Zoom State variables
-        let cameraRadius = 260;
-        let targetCameraRadius = 260;
+        // Estado de la cámara: Comienza ultra lejana (2200) para la animación de entrada
+        let cameraRadius = 2200;
+        let targetCameraRadius = 260; // Distancia final a la que se estabilizará
+        let isIntroZooming = true; // Bandera de animación de inicio
+
         let targetRotationX = 0.3;
         let targetRotationY = 0;
         let currentRotationX = 0.3;
@@ -161,12 +165,12 @@
         const mouse = new THREE.Vector2();
 
         const tulipVerses = [
-            "\"En este cosmos infinito, cada tulipán rosa lleva impreso nuestro amor más sincero.\"",
+            "\"En este cosmos infinito, cada tulipán lleva impreso nuestro amor más sincero.\"",
             "\"Eres la estrella más hermosa que ilumina mi galaxia y guía cada uno de mis pasos.\"",
             "\"Aunque el universo sea vasto, mi corazón siempre orbita alrededor del tuyo para siempre.\"",
             "\"Cada pétalo de este jardín estelar susurra un 'te amo' eterno que trasciende el tiempo.\"",
-            "\"Bajo esta galaxia de luz rosa, descubrí que mi hogar favorito es estar a tu lado.\"",
-            "\"Tus ojos brillan más que todas las nebulosas juntas en este inmenso firmamento.\""
+            "\"Bajo esta galaxia de luz estelar, descubrí que mi hogar favorito es estar a tu lado.\"",
+            "\"Tus ojos brillan más que todas las nebulosas juntas en este inmeso firmamento.\""
         ];
 
         function init3D() {
@@ -176,7 +180,7 @@
             scene.fog = new THREE.FogExp2(0x0b0212, 0.0014);
 
             // Camera
-            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
             updateCameraPosition();
 
             // Renderer
@@ -539,10 +543,21 @@
             leaf2.rotation.z = Math.PI / 4;
             tulipGroup.add(leaf2);
 
+            const colorPalette = [
+                { main: 0xf43f5e, emissive: 0xdb2777, petal: 0xfb7185, petalEmissive: 0xe11d48 },
+                { main: 0xd946ef, emissive: 0xc026d3, petal: 0xe879f9, petalEmissive: 0xa855f7 },
+                { main: 0xef4444, emissive: 0xdc2626, petal: 0xf87171, petalEmissive: 0xb91c1c },
+                { main: 0xfbbf24, emissive: 0xf59e0b, petal: 0xfde047, petalEmissive: 0xd97706 },
+                { main: 0x38bdf8, emissive: 0x0284c7, petal: 0x7dd3fc, petalEmissive: 0x0369a1 },
+                { main: 0xffffff, emissive: 0xe2e8f0, petal: 0xfff1f2, petalEmissive: 0xcfd2d8 }
+            ];
+
+            const selectedColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+
             const cupGeo = new THREE.CylinderGeometry(1.4, 2.5, 5.5, 8);
             const cupMat = new THREE.MeshStandardMaterial({
-                color: 0xf43f5e,
-                emissive: 0xdb2777,
+                color: selectedColor.main,
+                emissive: selectedColor.emissive,
                 emissiveIntensity: 0.5,
                 roughness: 0.3,
                 metalness: 0.1
@@ -553,8 +568,8 @@
 
             const petalGeo = new THREE.SphereGeometry(1.8, 8, 8, 0, Math.PI * 2, 0, Math.PI * 0.7);
             const petalMat = new THREE.MeshStandardMaterial({
-                color: 0xfb7185,
-                emissive: 0xe11d48,
+                color: selectedColor.petal,
+                emissive: selectedColor.petalEmissive,
                 emissiveIntensity: 0.4,
                 roughness: 0.25,
                 side: THREE.DoubleSide
@@ -576,6 +591,8 @@
             core.position.y = 1.3;
             tulipGroup.add(core);
 
+            tulipGroup.userData.baseColor = selectedColor.main;
+
             return tulipGroup;
         }
 
@@ -596,12 +613,10 @@
                 const scale = Math.random() * 0.7 + 1.0;
                 tulipMesh.scale.set(scale, scale, scale);
 
-                tulipMesh.userData = {
-                    id: i,
-                    verse: tulipVerses[i % tulipVerses.length],
-                    originalY: tulipMesh.position.y,
-                    rotSpeed: (Math.random() - 0.5) * 0.015
-                };
+                tulipMesh.userData.id = i;
+                tulipMesh.userData.verse = tulipVerses[i % tulipVerses.length];
+                tulipMesh.userData.originalY = tulipMesh.position.y;
+                tulipMesh.userData.rotSpeed = (Math.random() - 0.5) * 0.015;
 
                 scene.add(tulipMesh);
                 tulipClusters.push(tulipMesh);
@@ -609,7 +624,7 @@
         }
 
         // --- SUPERNOVA BURST PARTICLE EFFECT ---
-        function triggerTulipSupernova(x, y, z) {
+        function triggerTulipSupernova(x, y, z, customColor = 0xf43f5e) {
             const count = 75;
             const velocities = [];
 
@@ -629,7 +644,7 @@
 
             for (let i = 0; i < count; i++) {
                 const pMat = new THREE.MeshBasicMaterial({
-                    color: Math.random() > 0.5 ? 0xf43f5e : 0xffd1dc,
+                    color: Math.random() > 0.3 ? customColor : 0xffffff,
                     transparent: true,
                     opacity: 1,
                     blending: THREE.AdditiveBlending
@@ -648,15 +663,13 @@
             }
         }
 
-        // --- SISTEMA DE ESTRELLAS FUGACES VISIBLES Y DINÁMICAS ---
+        // --- SISTEMA DE ESTRELLAS FUGACES ---
         function spawnShootingStar() {
-            // Posicionar la estrella fugaz en el área visible superior frente a la cámara
             const startX = (Math.random() - 0.5) * 220;
             const startY = 100 + Math.random() * 80;
             const startZ = (Math.random() - 0.5) * 220;
             const startPos = new THREE.Vector3(startX, startY, startZ);
 
-            // Trayectoria diagonal cruzando el espacio visible
             const direction = new THREE.Vector3(
                 (Math.random() - 0.5) * 8,
                 -Math.random() * 6 - 4,
@@ -679,7 +692,7 @@
 
             const shootingStar = new THREE.Line(geometry, material);
             shootingStar.userData = {
-                direction: direction.multiplyScalar(6.0), // Velocidad óptima visible
+                direction: direction.multiplyScalar(6.0),
                 life: 1.0,
                 decay: Math.random() * 0.02 + 0.015
             };
@@ -696,6 +709,7 @@
         }
 
         function onPointerDown(event) {
+            if (isIntroZooming) return; // Bloquear controles durante el zoom de entrada
             if (event.target.closest('.interactive') || event.target.closest('#verse-modal')) return;
             isDragging = true;
             isAutoRotating = false;
@@ -705,7 +719,7 @@
         }
 
         function onPointerMove(event) {
-            if (!isDragging) return;
+            if (isIntroZooming || !isDragging) return;
             const deltaX = event.clientX - previousMousePosition.x;
             const deltaY = event.clientY - previousMousePosition.y;
 
@@ -721,6 +735,7 @@
         }
 
         function onTouchStart(event) {
+            if (isIntroZooming) return;
             if (event.target.closest('.interactive') || event.target.closest('#verse-modal')) return;
             
             if (event.touches.length === 1) {
@@ -739,6 +754,7 @@
         }
 
         function onTouchMove(event) {
+            if (isIntroZooming) return;
             if (event.target.closest('.interactive') || event.target.closest('#verse-modal')) return;
 
             if (isDragging && event.touches.length === 1) {
@@ -757,7 +773,7 @@
                     event.touches[0].clientY - event.touches[1].clientY
                 );
                 const zoomFactor = initialPinchDistance / currentDist;
-                targetCameraRadius = Math.max(90, Math.min(650, targetCameraRadius * (1 + (zoomFactor - 1) * 0.2)));
+                targetCameraRadius = Math.max(90, Math.min(1200, targetCameraRadius * (1 + (zoomFactor - 1) * 0.2)));
                 initialPinchDistance = currentDist;
                 event.preventDefault();
             }
@@ -773,12 +789,14 @@
         }
 
         function onWheelScroll(event) {
+            if (isIntroZooming) return;
             event.preventDefault();
             targetCameraRadius += event.deltaY * 0.3;
-            targetCameraRadius = Math.max(90, Math.min(650, targetCameraRadius));
+            targetCameraRadius = Math.max(90, Math.min(1200, targetCameraRadius));
         }
 
         function onCanvasClick(event) {
+            if (isIntroZooming) return;
             if (event.target.closest('.interactive') || event.target.closest('#verse-modal')) return;
 
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -795,7 +813,7 @@
 
                 if (obj && obj.userData?.verse) {
                     openVerseModal(obj.userData.verse);
-                    triggerTulipSupernova(obj.position.x, obj.position.y, obj.position.z);
+                    triggerTulipSupernova(obj.position.x, obj.position.y, obj.position.z, obj.userData.baseColor || 0xf43f5e);
                 }
             }
         }
@@ -832,7 +850,22 @@
 
             const elapsedTime = clock.getElapsedTime();
 
-            // Frecuencia optimizada para ver estrellas fugaces con mayor regularidad
+            // Animación de entrada: Zoom In cinemático desde la distancia 2200 hacia 260
+            if (isIntroZooming) {
+                cameraRadius += (targetCameraRadius - cameraRadius) * 0.035; // Suavizado de acercamiento
+                if (Math.abs(cameraRadius - targetCameraRadius) < 1.5) {
+                    cameraRadius = targetCameraRadius;
+                    isIntroZooming = false;
+                    
+                    // Mostrar la tarjeta de bienvenida al finalizar el zoom
+                    const loveCard = document.getElementById('love-card');
+                    if (loveCard) {
+                        loveCard.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+                        loveCard.classList.add('opacity-100', 'scale-100');
+                    }
+                }
+            }
+
             if (elapsedTime - lastShootingStarTime > (1.8 + Math.random() * 2.0)) {
                 spawnShootingStar();
                 lastShootingStarTime = elapsedTime;
@@ -865,7 +898,6 @@
                 tulip.position.y = tulip.userData.originalY + Math.sin(elapsedTime * 2 + tulip.position.x) * 4;
             });
 
-            // Actualizar partículas de Supernova
             for (let i = burstParticles.length - 1; i >= 0; i--) {
                 const p = burstParticles[i];
                 p.position.add(p.userData.velocity);
@@ -882,7 +914,6 @@
                 }
             }
 
-            // Actualizar estrellas fugaces
             for (let i = shootingStars.length - 1; i >= 0; i--) {
                 const s = shootingStars[i];
                 s.position.add(s.userData.direction);
@@ -897,14 +928,17 @@
                 }
             }
 
-            if (isAutoRotating) {
+            if (!isIntroZooming && isAutoRotating) {
                 targetRotationY = elapsedTime * 0.04;
                 targetRotationX = Math.sin(elapsedTime * 0.2) * 0.15 + 0.3;
             }
 
             currentRotationY += (targetRotationY - currentRotationY) * 0.08;
             currentRotationX += (targetRotationX - currentRotationX) * 0.08;
-            cameraRadius += (targetCameraRadius - cameraRadius) * 0.08;
+            
+            if (!isIntroZooming) {
+                cameraRadius += (targetCameraRadius - cameraRadius) * 0.08;
+            }
 
             updateCameraPosition();
 
@@ -915,24 +949,15 @@
         window.addEventListener('DOMContentLoaded', () => {
             init3D();
 
-            setTimeout(() => {
-                const loveCard = document.getElementById('love-card');
-                if (loveCard) {
-                    loveCard.style.opacity = '0';
-                    loveCard.style.transform = 'scale(0.95)';
-                    loveCard.style.pointerEvents = 'none';
-                    setTimeout(() => {
-                        loveCard.style.display = 'none';
-                    }, 1000);
-                }
-            }, 10000);
+            // Nota: El temporizador de 10 segundos para ocultar la tarjeta se ha removido 
+            // para que la tarjeta aparezca exactamente al terminar la animación de Zoom In.
 
             const burstBtn = document.getElementById('burst-btn');
             const viewModeBtn = document.getElementById('view-mode-btn');
             const viewModeText = document.getElementById('view-mode-text');
 
             burstBtn.addEventListener('click', () => {
-                triggerTulipSupernova(0, 0, 0);
+                triggerTulipSupernova(0, 0, 0, 0xf43f5e);
             });
 
             viewModeBtn.addEventListener('click', () => {
