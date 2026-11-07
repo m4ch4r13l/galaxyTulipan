@@ -98,7 +98,7 @@
                     <i class="fa-solid fa-seedling text-2xl animate-bounce"></i>
                 </div>
                 <h1 class="title-font text-2xl md:text-3xl font-bold mb-2 glowing-pink text-pink-100">Galaxia de Tulipanes</h1>
-                <p class="script-font text-2xl md:text-3xl text-pink-200 my-4 leading-relaxed">
+                <p class="script-font text-xl md:text-2xl text-pink-200 my-4 leading-relaxed">
                     "Haz clic o toca cualquier tulipán flotante del universo 3D para descubrir su mensaje."
                 </p>
                 <div class="flex flex-wrap gap-2 justify-center mt-4">
@@ -119,17 +119,20 @@
 
     </div>
 
-    <!-- Interactive Verse Modal (Popup) -->
+    <!-- Interactive Verse Modal (Popup con marco cuadrado perfectamente centrado) -->
     <div id="verse-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
-        <div class="glass-panel rounded-3xl p-8 max-w-md w-full text-center relative transform scale-95 transition-all duration-300 border-pink-500/60 shadow-2xl shadow-pink-500/30">
-            <button id="close-modal" class="absolute top-4 right-4 text-pink-300 hover:text-white w-8 h-8 rounded-full bg-rose-950/60 flex items-center justify-center border border-pink-500/30 transition-all">
+        <div class="glass-panel rounded-3xl p-6 md:p-8 max-w-md w-full text-center relative transform scale-95 transition-all duration-300 border-pink-500/60 shadow-2xl shadow-pink-500/30 max-h-[90vh] overflow-y-auto">
+            <button id="close-modal" class="absolute top-4 right-4 text-pink-300 hover:text-white w-8 h-8 rounded-full bg-rose-950/60 flex items-center justify-center border border-pink-500/30 transition-all z-20">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/40">
-                <i class="fa-solid fa-heart text-xl animate-pulse"></i>
+            
+            <!-- Contenedor cuadrado estricto con recorte centrado automático para las imágenes -->
+            <div class="w-48 h-48 md:w-56 md:h-56 mx-auto mb-4 rounded-2xl overflow-hidden border border-pink-500/40 shadow-lg relative bg-black/40 flex items-center justify-center">
+                <img id="modal-img" src="" alt="Recuerdo Estelar" class="w-full h-full object-cover object-center">
             </div>
-            <h3 id="modal-title" class="title-font text-xl font-bold text-pink-100 mb-2">Tulipán Estelar</h3>
-            <p id="modal-verse" class="script-font text-3xl text-pink-200 my-6 leading-relaxed">
+
+            <h3 id="modal-title" class="title-font text-lg md:text-xl font-bold text-pink-100 mb-2">Tulipán Estelar</h3>
+            <p id="modal-verse" class="script-font text-xl md:text-2xl text-pink-200 my-4 leading-relaxed whitespace-pre-line">
                 "Verso de amor..."
             </p>
             <div class="text-xs text-pink-300/80 tracking-widest uppercase title-font">Para la estrella de mi vida</div>
@@ -145,7 +148,6 @@
         let galaxyParticles, backgroundStars, distantGalaxies, nebulaClouds, coreParticleCloud, tulipClusters = [], burstParticles = [], shootingStars = [];
         let isAutoRotating = true;
         
-        // Estado de la cámara: Comienza ultra lejana (2200) para la animación de entrada
         let cameraRadius = 2200;
         let targetCameraRadius = 260;
         let isIntroZooming = true;
@@ -162,13 +164,31 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        const tulipVerses = [
-            "\"En este cosmos infinito, cada tulipán lleva impreso nuestro amor más sincero.\"",
-            "\"Eres la estrella más hermosa que ilumina mi galaxia y guía cada uno de mis pasos.\"",
-            "\"Aunque el universo sea vasto, mi corazón siempre orbita alrededor del tuyo para siempre.\"",
-            "\"Cada pétalo de este jardín estelar susurra un 'te amo' eterno que trasciende el tiempo.\"",
-            "\"Bajo esta galaxia de luz estelar, descubrí que mi hogar favorito es estar a tu lado.\"",
-            "\"Tus ojos brillan más que todas las nebulosas juntas en este inmeso firmamento.\""
+        const tulipDataList = [
+            {
+                verse: `\"Una conexion \ncomo la nuestra.\nEstará.\Hasta cuando nosotros\ndejemos de estar...\"`,
+                image: "img1.jpeg"
+            },
+            {
+                verse: `\"¿Cómo no amarte vida mía?\nSi eres un sueño,\nen un mundo de pesadillas.\"`,
+                image: "img2.jpeg"
+            },
+            {
+                verse: `\"La vida es bella\nPero tu...\nMi vida...\nEres mas bella\nQue la vida en sí misma.\"`,
+                image: "img3.jpeg"
+            },
+            {
+                verse: `\"Si Dios existe, seguro es poeta,\nY te escribió a ti,\nCon perfección y amor en cada\nuna de tus letras...\"`,
+                image: "img4.jpeg"
+            },
+            {
+                verse: `\"Eres mía,\nPorque ni tan tuya has sido,\nComo ya has sido mía.\nY no eras mia como pertenencia,\nComo un objeto.\nEres mía como vinculo perpetuo.\"`,
+                image: "img5.jpeg"
+            },
+            {
+                verse: `\"Bendito sea DIos, su física\ny su perfecta cencia.\nBendita sea cada coincidencia,\nque permitio tu bendita existencia...\"`,
+                image: "img6.jpeg"
+            }
         ];
 
         function init3D() {
@@ -579,8 +599,10 @@
                 const scale = Math.random() * 0.7 + 1.0;
                 tulipMesh.scale.set(scale, scale, scale);
 
+                const dataIndex = i % tulipDataList.length;
                 tulipMesh.userData.id = i;
-                tulipMesh.userData.verse = tulipVerses[i % tulipVerses.length];
+                tulipMesh.userData.verse = tulipDataList[dataIndex].verse;
+                tulipMesh.userData.image = tulipDataList[dataIndex].image;
                 tulipMesh.userData.originalY = tulipMesh.position.y;
                 tulipMesh.userData.rotSpeed = (Math.random() - 0.5) * 0.015;
 
@@ -736,7 +758,7 @@
                 while (obj && !obj.userData?.verse && obj.parent) obj = obj.parent;
 
                 if (obj && obj.userData?.verse) {
-                    openVerseModal(obj.userData.verse);
+                    openVerseModal(obj.userData.verse, obj.userData.image);
                     triggerTulipSupernova(obj.position.x, obj.position.y, obj.position.z, obj.userData.baseColor || 0xf43f5e);
                 }
             }
@@ -744,10 +766,12 @@
 
         const verseModal = document.getElementById('verse-modal');
         const modalVerse = document.getElementById('modal-verse');
+        const modalImg = document.getElementById('modal-img');
         const closeModalBtn = document.getElementById('close-modal');
 
-        function openVerseModal(verseText) {
+        function openVerseModal(verseText, imageSrc) {
             modalVerse.textContent = verseText;
+            modalImg.src = imageSrc;
             verseModal.classList.remove('opacity-0', 'pointer-events-none');
             verseModal.querySelector('.glass-panel').classList.remove('scale-95');
             verseModal.querySelector('.glass-panel').classList.add('scale-100');
@@ -847,7 +871,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             init3D();
 
-            // Configuración del botón para cerrar la ventana inicial
             const closeCardBtn = document.getElementById('close-card-btn');
             const loveCard = document.getElementById('love-card');
 
