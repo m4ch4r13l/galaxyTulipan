@@ -91,7 +91,7 @@
             </div>
         </header>
 
-        <!-- Center Floating Card / Intro Banner (Oculto al inicio para la animación de Zoom) -->
+        <!-- Center Floating Card / Intro Banner -->
         <div class="flex justify-center items-center my-auto">
             <div id="love-card" class="glass-panel rounded-3xl p-6 md:p-8 max-w-md w-full text-center interactive transition-all duration-1000 shadow-2xl opacity-0 transform scale-90 pointer-events-none">
                 <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/40 text-white">
@@ -102,9 +102,9 @@
                     "Haz clic o toca cualquier tulipán flotante del universo 3D para descubrir su mensaje."
                 </p>
                 <div class="flex flex-wrap gap-2 justify-center mt-4">
-                    <button id="burst-btn" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center space-x-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span>Supernova de Tulipanes</span>
+                    <button id="close-card-btn" class="px-6 py-3 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 text-white font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-heart"></i>
+                        <span>Entrar a la Galaxia</span>
                     </button>
                 </div>
             </div>
@@ -147,20 +147,18 @@
         
         // Estado de la cámara: Comienza ultra lejana (2200) para la animación de entrada
         let cameraRadius = 2200;
-        let targetCameraRadius = 260; // Distancia final a la que se estabilizará
-        let isIntroZooming = true; // Bandera de animación de inicio
+        let targetCameraRadius = 260;
+        let isIntroZooming = true;
 
         let targetRotationX = 0.3;
         let targetRotationY = 0;
         let currentRotationX = 0.3;
         let currentRotationY = 0;
 
-        // Interaction state for Mouse & Touch (Drag & Pinch)
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let initialPinchDistance = null;
 
-        // Raycaster for clicking 3D tulip flowers
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
@@ -174,26 +172,21 @@
         ];
 
         function init3D() {
-            // Scene with deep cosmic background color
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x0b0212);
             scene.fog = new THREE.FogExp2(0x0b0212, 0.0014);
 
-            // Camera
             camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
             updateCameraPosition();
 
-            // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffd1dc, 1.4);
             scene.add(ambientLight);
 
-            // Luz puntual suave en el centro
             const corePointLight = new THREE.PointLight(0xffb6c1, 5.0, 700);
             corePointLight.position.set(0, 0, 0);
             scene.add(corePointLight);
@@ -205,7 +198,6 @@
             createMultiArmGalaxy();
             create3DTulipClusters();
 
-            // Event Listeners for Resize & Controls
             window.addEventListener('resize', onWindowResize);
             
             const domElem = renderer.domElement;
@@ -224,7 +216,6 @@
             animate3D();
         }
 
-        // --- CAMERA POSITION & ZOOM HELPER ---
         function updateCameraPosition() {
             camera.position.x = Math.sin(currentRotationY) * Math.cos(currentRotationX) * cameraRadius;
             camera.position.y = Math.sin(currentRotationX) * cameraRadius + 50;
@@ -232,7 +223,6 @@
             camera.lookAt(scene.position);
         }
 
-        // --- GENERADOR DE TEXTURA RADIAL DIFUSA ---
         function getParticleTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 128;
@@ -248,12 +238,9 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 128, 128);
 
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.generateMipmaps = true;
-            return texture;
+            return new THREE.CanvasTexture(canvas);
         }
 
-        // --- CREATE PARALLAX BACKGROUND STARS ---
         function createBackgroundStars() {
             const starCount = 8000;
             const geometry = new THREE.BufferGeometry();
@@ -290,20 +277,17 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-            const material = new THREE.PointsMaterial({
+            backgroundStars = new THREE.Points(geometry, new THREE.PointsMaterial({
                 size: 2.5,
                 vertexColors: true,
                 transparent: true,
                 opacity: 0.95,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
-            });
-
-            backgroundStars = new THREE.Points(geometry, material);
+            }));
             scene.add(backgroundStars);
         }
 
-        // --- CREATE DISTANT GALAXIES ---
         function createDistantGalaxies() {
             const galCount = 250;
             const geometry = new THREE.BufferGeometry();
@@ -339,7 +323,7 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-            const galMaterial = new THREE.PointsMaterial({
+            distantGalaxies = new THREE.Points(geometry, new THREE.PointsMaterial({
                 size: 18.0,
                 vertexColors: true,
                 transparent: true,
@@ -348,13 +332,10 @@
                 alphaTest: 0.001,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
-            });
-
-            distantGalaxies = new THREE.Points(geometry, galMaterial);
+            }));
             scene.add(distantGalaxies);
         }
 
-        // --- CREATE DIFFUSE GALAXY CORE ---
         function createDiffuseGalaxyCore() {
             const coreParticlesCount = 3500;
             const geometry = new THREE.BufferGeometry();
@@ -393,7 +374,7 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-            const coreMaterial = new THREE.PointsMaterial({
+            coreParticleCloud = new THREE.Points(geometry, new THREE.PointsMaterial({
                 size: 14.0,
                 vertexColors: true,
                 transparent: true,
@@ -402,13 +383,10 @@
                 alphaTest: 0.001,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
-            });
-
-            coreParticleCloud = new THREE.Points(geometry, coreMaterial);
+            }));
             scene.add(coreParticleCloud);
         }
 
-        // --- CREATE NEBULA DUST CLOUDS ALONG SPIRAL ARMS ---
         function createNebulaDust() {
             const cloudCount = 1200;
             const geometry = new THREE.BufferGeometry();
@@ -448,20 +426,17 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-            const nebulaMaterial = new THREE.PointsMaterial({
+            nebulaClouds = new THREE.Points(geometry, new THREE.PointsMaterial({
                 size: 22.0,
                 vertexColors: true,
                 transparent: true,
                 opacity: 0.18,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
-            });
-
-            nebulaClouds = new THREE.Points(geometry, nebulaMaterial);
+            }));
             scene.add(nebulaClouds);
         }
 
-        // --- CREATE MULTI-ARM SPIRAL GALAXY PARTICLES (6 ARMS) ---
         function createMultiArmGalaxy() {
             const particleCount = 22000;
             const geometry = new THREE.BufferGeometry();
@@ -507,31 +482,27 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-            const particleMaterial = new THREE.PointsMaterial({
+            galaxyParticles = new THREE.Points(geometry, new THREE.PointsMaterial({
                 size: 2.0,
                 vertexColors: true,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
                 opacity: 0.9,
                 depthWrite: false
-            });
-
-            galaxyParticles = new THREE.Points(geometry, particleMaterial);
+            }));
             scene.add(galaxyParticles);
         }
 
-        // --- CREATE DETAILED 3D TULIP MESH ---
         function createSingleTulipMesh() {
             const tulipGroup = new THREE.Group();
 
-            const stemGeo = new THREE.CylinderGeometry(0.3, 0.4, 15, 6);
             const stemMat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
-            const stem = new THREE.Mesh(stemGeo, stemMat);
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 15, 6), stemMat);
             stem.position.y = -7.5;
             tulipGroup.add(stem);
 
-            const leafGeo = new THREE.ConeGeometry(1.4, 5.5, 4);
             const leafMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+            const leafGeo = new THREE.ConeGeometry(1.4, 5.5, 4);
             
             const leaf1 = new THREE.Mesh(leafGeo, leafMat);
             leaf1.position.set(1.1, -5.5, 0);
@@ -554,15 +525,16 @@
 
             const selectedColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
 
-            const cupGeo = new THREE.CylinderGeometry(1.4, 2.5, 5.5, 8);
-            const cupMat = new THREE.MeshStandardMaterial({
-                color: selectedColor.main,
-                emissive: selectedColor.emissive,
-                emissiveIntensity: 0.5,
-                roughness: 0.3,
-                metalness: 0.1
-            });
-            const cup = new THREE.Mesh(cupGeo, cupMat);
+            const cup = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.4, 2.5, 5.5, 8),
+                new THREE.MeshStandardMaterial({
+                    color: selectedColor.main,
+                    emissive: selectedColor.emissive,
+                    emissiveIntensity: 0.5,
+                    roughness: 0.3,
+                    metalness: 0.1
+                })
+            );
             cup.position.y = 0.5;
             tulipGroup.add(cup);
 
@@ -585,24 +557,18 @@
                 tulipGroup.add(petal);
             }
 
-            const coreGeo = new THREE.SphereGeometry(0.9, 8, 8);
-            const coreMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
-            const core = new THREE.Mesh(coreGeo, coreMat);
+            const core = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
             core.position.y = 1.3;
             tulipGroup.add(core);
 
             tulipGroup.userData.baseColor = selectedColor.main;
-
             return tulipGroup;
         }
 
-        // --- CREATE 3D GLOWING TULIP CLUSTERS ---
         function create3DTulipClusters() {
             const clusterCount = 42;
-
             for (let i = 0; i < clusterCount; i++) {
                 const tulipMesh = createSingleTulipMesh();
-                
                 const theta = Math.random() * Math.PI * 2;
                 const r = 90 + Math.random() * 240;
 
@@ -623,7 +589,6 @@
             }
         }
 
-        // --- SUPERNOVA BURST PARTICLE EFFECT ---
         function triggerTulipSupernova(x, y, z, customColor = 0xf43f5e) {
             const count = 75;
             const velocities = [];
@@ -633,24 +598,23 @@
                 const theta = Math.random() * Math.PI * 2;
                 const phi = Math.acos((Math.random() * 2) - 1);
                 
-                velocities.push(
-                    new THREE.Vector3(
-                        speed * Math.sin(phi) * Math.cos(theta),
-                        speed * Math.sin(phi) * Math.sin(theta),
-                        speed * Math.cos(phi)
-                    )
-                );
+                velocities.push(new THREE.Vector3(
+                    speed * Math.sin(phi) * Math.cos(theta),
+                    speed * Math.sin(phi) * Math.sin(theta),
+                    speed * Math.cos(phi)
+                ));
             }
 
             for (let i = 0; i < count; i++) {
-                const pMat = new THREE.MeshBasicMaterial({
-                    color: Math.random() > 0.3 ? customColor : 0xffffff,
-                    transparent: true,
-                    opacity: 1,
-                    blending: THREE.AdditiveBlending
-                });
-                const pGeo = new THREE.SphereGeometry(1.2, 6, 6);
-                const particle = new THREE.Mesh(pGeo, pMat);
+                const particle = new THREE.Mesh(
+                    new THREE.SphereGeometry(1.2, 6, 6),
+                    new THREE.MeshBasicMaterial({
+                        color: Math.random() > 0.3 ? customColor : 0xffffff,
+                        transparent: true,
+                        opacity: 1,
+                        blending: THREE.AdditiveBlending
+                    })
+                );
                 particle.position.set(x, y, z);
                 particle.userData = {
                     velocity: velocities[i],
@@ -663,45 +627,25 @@
             }
         }
 
-        // --- SISTEMA DE ESTRELLAS FUGACES ---
         function spawnShootingStar() {
-            const startX = (Math.random() - 0.5) * 220;
-            const startY = 100 + Math.random() * 80;
-            const startZ = (Math.random() - 0.5) * 220;
-            const startPos = new THREE.Vector3(startX, startY, startZ);
+            const startPos = new THREE.Vector3((Math.random() - 0.5) * 220, 100 + Math.random() * 80, (Math.random() - 0.5) * 220);
+            const direction = new THREE.Vector3((Math.random() - 0.5) * 8, -Math.random() * 6 - 4, (Math.random() - 0.5) * 8).normalize();
 
-            const direction = new THREE.Vector3(
-                (Math.random() - 0.5) * 8,
-                -Math.random() * 6 - 4,
-                (Math.random() - 0.5) * 8
-            ).normalize();
-
-            const trailLength = 25;
             const points = [];
-            for (let j = 0; j < trailLength; j++) {
+            for (let j = 0; j < 25; j++) {
                 points.push(startPos.clone().sub(direction.clone().multiplyScalar(j * 1.5)));
             }
 
-            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            const material = new THREE.LineBasicMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 1.0,
-                blending: THREE.AdditiveBlending
-            });
-
-            const shootingStar = new THREE.Line(geometry, material);
-            shootingStar.userData = {
-                direction: direction.multiplyScalar(6.0),
-                life: 1.0,
-                decay: Math.random() * 0.02 + 0.015
-            };
+            const shootingStar = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points),
+                new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending })
+            );
+            shootingStar.userData = { direction: direction.multiplyScalar(6.0), life: 1.0, decay: Math.random() * 0.02 + 0.015 };
 
             scene.add(shootingStar);
             shootingStars.push(shootingStar);
         }
 
-        // --- WINDOW RESIZE & INTERACTION CONTROLS ---
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -709,7 +653,7 @@
         }
 
         function onPointerDown(event) {
-            if (isIntroZooming) return; // Bloquear controles durante el zoom de entrada
+            if (isIntroZooming) return;
             if (event.target.closest('.interactive') || event.target.closest('#verse-modal')) return;
             isDragging = true;
             isAutoRotating = false;
@@ -730,9 +674,7 @@
             previousMousePosition = { x: event.clientX, y: event.clientY };
         }
 
-        function onPointerUp() {
-            isDragging = false;
-        }
+        function onPointerUp() { isDragging = false; }
 
         function onTouchStart(event) {
             if (isIntroZooming) return;
@@ -746,10 +688,7 @@
                 previousMousePosition = { x: event.touches[0].clientX, y: event.touches[0].clientY };
             } else if (event.touches.length === 2) {
                 isDragging = false;
-                initialPinchDistance = Math.hypot(
-                    event.touches[0].clientX - event.touches[1].clientX,
-                    event.touches[0].clientY - event.touches[1].clientY
-                );
+                initialPinchDistance = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
             }
         }
 
@@ -758,41 +697,28 @@
             if (event.target.closest('.interactive') || event.target.closest('#verse-modal')) return;
 
             if (isDragging && event.touches.length === 1) {
-                const deltaX = event.touches[0].clientX - previousMousePosition.x;
-                const deltaY = event.touches[0].clientY - previousMousePosition.y;
-
-                targetRotationY -= deltaX * 0.005;
-                targetRotationX += deltaY * 0.005;
+                targetRotationY -= (event.touches[0].clientX - previousMousePosition.x) * 0.005;
+                targetRotationX += (event.touches[0].clientY - previousMousePosition.y) * 0.005;
                 targetRotationX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, targetRotationX));
-
                 previousMousePosition = { x: event.touches[0].clientX, y: event.touches[0].clientY };
                 event.preventDefault();
             } else if (event.touches.length === 2 && initialPinchDistance !== null) {
-                const currentDist = Math.hypot(
-                    event.touches[0].clientX - event.touches[1].clientX,
-                    event.touches[0].clientY - event.touches[1].clientY
-                );
-                const zoomFactor = initialPinchDistance / currentDist;
-                targetCameraRadius = Math.max(90, Math.min(1200, targetCameraRadius * (1 + (zoomFactor - 1) * 0.2)));
+                const currentDist = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+                targetCameraRadius = Math.max(90, Math.min(1200, targetCameraRadius * (1 + ((initialPinchDistance / currentDist) - 1) * 0.2)));
                 initialPinchDistance = currentDist;
                 event.preventDefault();
             }
         }
 
         function onTouchEnd(event) {
-            if (event.touches.length < 2) {
-                initialPinchDistance = null;
-            }
-            if (event.touches.length === 0) {
-                isDragging = false;
-            }
+            if (event.touches.length < 2) initialPinchDistance = null;
+            if (event.touches.length === 0) isDragging = false;
         }
 
         function onWheelScroll(event) {
             if (isIntroZooming) return;
             event.preventDefault();
-            targetCameraRadius += event.deltaY * 0.3;
-            targetCameraRadius = Math.max(90, Math.min(1200, targetCameraRadius));
+            targetCameraRadius = Math.max(90, Math.min(1200, targetCameraRadius + event.deltaY * 0.3));
         }
 
         function onCanvasClick(event) {
@@ -807,9 +733,7 @@
 
             if (intersects.length > 0) {
                 let obj = intersects[0].object;
-                while (obj && !obj.userData?.verse && obj.parent) {
-                    obj = obj.parent;
-                }
+                while (obj && !obj.userData?.verse && obj.parent) obj = obj.parent;
 
                 if (obj && obj.userData?.verse) {
                     openVerseModal(obj.userData.verse);
@@ -818,7 +742,6 @@
             }
         }
 
-        // --- MODAL POPUP CONTROLS ---
         const verseModal = document.getElementById('verse-modal');
         const modalVerse = document.getElementById('modal-verse');
         const closeModalBtn = document.getElementById('close-modal');
@@ -837,27 +760,20 @@
         }
 
         closeModalBtn.addEventListener('click', closeVerseModal);
-        verseModal.addEventListener('click', (e) => {
-            if (e.target === verseModal) closeVerseModal();
-        });
+        verseModal.addEventListener('click', (e) => { if (e.target === verseModal) closeVerseModal(); });
 
-        // --- ANIMATION LOOP ---
         let clock = new THREE.Clock();
         let lastShootingStarTime = 0;
 
         function animate3D() {
             requestAnimationFrame(animate3D);
-
             const elapsedTime = clock.getElapsedTime();
 
-            // Animación de entrada: Zoom In cinemático desde la distancia 2200 hacia 260
             if (isIntroZooming) {
-                cameraRadius += (targetCameraRadius - cameraRadius) * 0.035; // Suavizado de acercamiento
+                cameraRadius += (targetCameraRadius - cameraRadius) * 0.035;
                 if (Math.abs(cameraRadius - targetCameraRadius) < 1.5) {
                     cameraRadius = targetCameraRadius;
                     isIntroZooming = false;
-                    
-                    // Mostrar la tarjeta de bienvenida al finalizar el zoom
                     const loveCard = document.getElementById('love-card');
                     if (loveCard) {
                         loveCard.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
@@ -871,21 +787,10 @@
                 lastShootingStarTime = elapsedTime;
             }
 
-            if (galaxyParticles) {
-                galaxyParticles.rotation.y = elapsedTime * 0.04;
-            }
-
-            if (nebulaClouds) {
-                nebulaClouds.rotation.y = elapsedTime * 0.025;
-            }
-
-            if (backgroundStars) {
-                backgroundStars.rotation.y = elapsedTime * 0.005;
-            }
-
-            if (distantGalaxies) {
-                distantGalaxies.rotation.y = elapsedTime * 0.002;
-            }
+            if (galaxyParticles) galaxyParticles.rotation.y = elapsedTime * 0.04;
+            if (nebulaClouds) nebulaClouds.rotation.y = elapsedTime * 0.025;
+            if (backgroundStars) backgroundStars.rotation.y = elapsedTime * 0.005;
+            if (distantGalaxies) distantGalaxies.rotation.y = elapsedTime * 0.002;
 
             if (coreParticleCloud) {
                 coreParticleCloud.rotation.y = elapsedTime * 0.03;
@@ -905,7 +810,6 @@
                 p.rotation.y += p.userData.rotSpeed.y;
                 p.userData.life -= p.userData.decay;
                 p.material.opacity = p.userData.life;
-
                 if (p.userData.life <= 0) {
                     scene.remove(p);
                     p.geometry.dispose();
@@ -919,7 +823,6 @@
                 s.position.add(s.userData.direction);
                 s.userData.life -= s.userData.decay;
                 s.material.opacity = s.userData.life;
-
                 if (s.userData.life <= 0) {
                     scene.remove(s);
                     s.geometry.dispose();
@@ -935,30 +838,30 @@
 
             currentRotationY += (targetRotationY - currentRotationY) * 0.08;
             currentRotationX += (targetRotationX - currentRotationX) * 0.08;
-            
-            if (!isIntroZooming) {
-                cameraRadius += (targetCameraRadius - cameraRadius) * 0.08;
-            }
+            if (!isIntroZooming) cameraRadius += (targetCameraRadius - cameraRadius) * 0.08;
 
             updateCameraPosition();
-
             renderer.render(scene, camera);
         }
 
-        // --- UI INTERACTION BINDINGS ---
         window.addEventListener('DOMContentLoaded', () => {
             init3D();
 
-            // Nota: El temporizador de 10 segundos para ocultar la tarjeta se ha removido 
-            // para que la tarjeta aparezca exactamente al terminar la animación de Zoom In.
+            // Configuración del botón para cerrar la ventana inicial
+            const closeCardBtn = document.getElementById('close-card-btn');
+            const loveCard = document.getElementById('love-card');
 
-            const burstBtn = document.getElementById('burst-btn');
+            closeCardBtn.addEventListener('click', () => {
+                if (loveCard) {
+                    loveCard.style.opacity = '0';
+                    loveCard.style.transform = 'scale(0.95)';
+                    loveCard.style.pointerEvents = 'none';
+                    setTimeout(() => { loveCard.style.display = 'none'; }, 500);
+                }
+            });
+
             const viewModeBtn = document.getElementById('view-mode-btn');
             const viewModeText = document.getElementById('view-mode-text');
-
-            burstBtn.addEventListener('click', () => {
-                triggerTulipSupernova(0, 0, 0, 0xf43f5e);
-            });
 
             viewModeBtn.addEventListener('click', () => {
                 isAutoRotating = !isAutoRotating;
@@ -980,31 +883,23 @@
         function playAmbientChime() {
             if (!isAudioPlaying) return;
             try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
+                if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const notes = [329.63, 392.00, 440.00, 523.25, 659.25, 783.99];
-                const freq = notes[Math.floor(Math.random() * notes.length)];
-
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-
+                osc.frequency.setValueAtTime(notes[Math.floor(Math.random() * notes.length)], audioContext.currentTime);
                 gain.gain.setValueAtTime(0.05, audioContext.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 4.0);
 
                 osc.connect(gain);
                 gain.connect(audioContext.destination);
-
                 osc.start();
                 osc.stop(audioContext.currentTime + 4.0);
             } catch(e) {}
 
-            if (isAudioPlaying) {
-                setTimeout(playAmbientChime, 2500 + Math.random() * 1500);
-            }
+            if (isAudioPlaying) setTimeout(playAmbientChime, 2500 + Math.random() * 1500);
         }
 
         audioToggle.addEventListener('click', () => {
