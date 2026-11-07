@@ -69,7 +69,6 @@
 
         <!-- Top Header -->
         <header class="w-full flex justify-between items-center max-w-7xl mx-auto relative">
-            <!-- Título centrado en móvil, alineado a la izquierda en PC -->
             <div class="w-full md:w-auto flex justify-center md:justify-start">
                 <div class="flex items-center space-x-3 glass-panel px-4 py-2 rounded-full interactive">
                     <i class="fa-solid fa-heart text-pink-400 text-lg animate-pulse"></i>
@@ -141,7 +140,7 @@
         const container = document.getElementById('webgl-container');
         
         let scene, camera, renderer;
-        let galaxyParticles, backgroundStars, distantGalaxies, nebulaClouds, coreParticleCloud, tulipClusters = [], burstParticles = [];
+        let galaxyParticles, backgroundStars, distantGalaxies, nebulaClouds, coreParticleCloud, tulipClusters = [], burstParticles = [], shootingStars = [];
         let isAutoRotating = true;
         
         // Camera Orbit & Zoom State variables
@@ -649,6 +648,46 @@
             }
         }
 
+        // --- SISTEMA DE ESTRELLAS FUGACES VISIBLES Y DINÁMICAS ---
+        function spawnShootingStar() {
+            // Posicionar la estrella fugaz en el área visible superior frente a la cámara
+            const startX = (Math.random() - 0.5) * 220;
+            const startY = 100 + Math.random() * 80;
+            const startZ = (Math.random() - 0.5) * 220;
+            const startPos = new THREE.Vector3(startX, startY, startZ);
+
+            // Trayectoria diagonal cruzando el espacio visible
+            const direction = new THREE.Vector3(
+                (Math.random() - 0.5) * 8,
+                -Math.random() * 6 - 4,
+                (Math.random() - 0.5) * 8
+            ).normalize();
+
+            const trailLength = 25;
+            const points = [];
+            for (let j = 0; j < trailLength; j++) {
+                points.push(startPos.clone().sub(direction.clone().multiplyScalar(j * 1.5)));
+            }
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 1.0,
+                blending: THREE.AdditiveBlending
+            });
+
+            const shootingStar = new THREE.Line(geometry, material);
+            shootingStar.userData = {
+                direction: direction.multiplyScalar(6.0), // Velocidad óptima visible
+                life: 1.0,
+                decay: Math.random() * 0.02 + 0.015
+            };
+
+            scene.add(shootingStar);
+            shootingStars.push(shootingStar);
+        }
+
         // --- WINDOW RESIZE & INTERACTION CONTROLS ---
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -786,11 +825,18 @@
 
         // --- ANIMATION LOOP ---
         let clock = new THREE.Clock();
+        let lastShootingStarTime = 0;
 
         function animate3D() {
             requestAnimationFrame(animate3D);
 
             const elapsedTime = clock.getElapsedTime();
+
+            // Frecuencia optimizada para ver estrellas fugaces con mayor regularidad
+            if (elapsedTime - lastShootingStarTime > (1.8 + Math.random() * 2.0)) {
+                spawnShootingStar();
+                lastShootingStarTime = elapsedTime;
+            }
 
             if (galaxyParticles) {
                 galaxyParticles.rotation.y = elapsedTime * 0.04;
@@ -819,6 +865,7 @@
                 tulip.position.y = tulip.userData.originalY + Math.sin(elapsedTime * 2 + tulip.position.x) * 4;
             });
 
+            // Actualizar partículas de Supernova
             for (let i = burstParticles.length - 1; i >= 0; i--) {
                 const p = burstParticles[i];
                 p.position.add(p.userData.velocity);
@@ -832,6 +879,21 @@
                     p.geometry.dispose();
                     p.material.dispose();
                     burstParticles.splice(i, 1);
+                }
+            }
+
+            // Actualizar estrellas fugaces
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const s = shootingStars[i];
+                s.position.add(s.userData.direction);
+                s.userData.life -= s.userData.decay;
+                s.material.opacity = s.userData.life;
+
+                if (s.userData.life <= 0) {
+                    scene.remove(s);
+                    s.geometry.dispose();
+                    s.material.dispose();
+                    shootingStars.splice(i, 1);
                 }
             }
 
